@@ -3,8 +3,19 @@ require "json"
 
 module Contactually
   class API
-    def initialize(api_key)
+
+    def initialize(api_key, headers = {} )
       @api_key = api_key
+
+      # The Contactually API recommends passing in a User-Agent header unique to
+      # the client application as a best practice
+      # (see: http://developers.contactually.com/docs/):
+      #
+      #     Contactually::API.new(
+      #         { "YOUR_CONTACTUALLY_API_KEY", :user_agent => "YOUR_APP_NAME" }
+      #     )
+      #
+      @headers = headers
     end
 
     def call(method, args)
@@ -27,6 +38,9 @@ module Contactually
       http_method, contactually_method = get_methods(method)
       uri = build_uri(contactually_method, args)
       response = Curl.send(http_method.to_sym, uri, JSON.dump(param_fields(args))) do |curl|
+        @headers.each do |header_name, header_value|
+          curl.headers[header_name.to_s.titleize.gsub(" ", "-")] = header_value
+        end
         curl.headers['Accept'] = 'application/json'
         curl.headers['Content-Type'] = 'application/json'
       end
