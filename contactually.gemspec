@@ -8,8 +8,8 @@ Gem::Specification.new do |gem|
   gem.version       = Contactually::VERSION
   gem.authors       = ["Guille Carlos"]
   gem.email         = ["guille@bitpop.in"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.description   = %q{Write a gem description}
+  gem.summary       = %q{Write a gem summary}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($/)
