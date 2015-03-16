@@ -4,6 +4,8 @@ require "json"
 module Contactually
   class API
 
+    ReturnValue = Struct.new(:code, :body)
+
     HTTP_ACTIONS = %w(get post put delete).freeze
     METHODS      = %w(contacts notes groupings).freeze
 
@@ -43,7 +45,9 @@ module Contactually
     end
 
     def make_call(composite, params = {})
-      return false unless get_methods(composite)
+      unless get_methods(composite)
+        return ReturnValue.new(400, "Bad action/method '#{composite}'")
+      end
       uri      = build_uri(contactually_method, params)
       response = Curl.send(http_action.to_sym, uri, param_fields(params)) do |curl|
         @headers.each do |header_name, header_value|
@@ -52,7 +56,16 @@ module Contactually
         curl.headers['Accept']       = 'application/json'
         curl.headers['Content-Type'] = 'application/json'
       end
-      JSON.load("[#{response.body_str}]").first
+
+      if [200, 201, 202].include?(response.response_code)
+        return ReturnValue.new(
+          response.response_code,
+          JSON.load("[#{response.body_str}]").first
+        )
+      end
+      ReturnValue.new(response.response_code, response.body_str)
+    rescue => e
+      ReturnValue.new(500, "Could not complete call, #{e.message}")
     end
 
     def build_uri(contactually_method, args = {})
