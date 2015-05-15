@@ -69,7 +69,7 @@ module Contactually
     end
 
     def build_uri(contactually_method, args = {})
-      id_arg = args.has_key?(:id) ? "/#{args["id"]}" : ""
+      id_arg = args.has_key?(:id) ? "/#{args[:id]}" : ""
       "https://www.contactually.com/api/v1/#{contactually_method}#{id_arg}.json?api_key=#{@api_key}"
     end
 
